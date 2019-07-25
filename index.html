@@ -9,9 +9,31 @@
       padding: 0;
       font-size: 14px;
     }
+    video{
+      border: 1px solid #2aaaff;
+    }
+    div{
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+    }
+    .btn{
+      width: 120px;
+      height: 44px;
+      background: #2aaaff;
+      color: #fff;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
   <div id="app"></div>
+  <div>
+    <button class="btn" type="button">打开摄像</button>
+    <button class="btn" type="button">关闭摄像</button>
+    <button class="btn" type="button">开始录像</button>
+    <button class="btn" type="button">停止录像</button>
+  </div>
+  <video width="1280" height="720" id="video"></video>
 </body>
 </html>

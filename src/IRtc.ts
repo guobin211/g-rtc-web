@@ -22,13 +22,16 @@ export interface IRtc {
   stop(): Promise<any>;
   /**
    *
-   * @param name
-   * @param callback
+   * @param name 事件名
+   * @param callback 回调函数
    */
   on(name: string, callback: callbackFn): void;
 }
 
 export interface RtcOptions {
-  width: string;
-  height: string;
+  audio: true;
+  video: {
+    width: string;
+    height: string;
+  };
 }

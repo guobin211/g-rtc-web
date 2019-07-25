@@ -6,7 +6,8 @@
 
 export class Tools {
 
-  static getMedia() {
-
+  static polyfill() {
+    // @ts-ignore
+    window.navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
   }
 }
