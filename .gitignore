@@ -88,4 +88,5 @@ typings/
 .dynamodb/
 .idea
 dist
-
+build
+.DS_Store

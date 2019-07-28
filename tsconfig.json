@@ -22,8 +22,7 @@
   ],
   "exclude": [
     "node_modules",
-    "config",
+    "script",
     "script"
-  ],
-
+  ]
 }

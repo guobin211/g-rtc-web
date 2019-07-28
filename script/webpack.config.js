@@ -1,5 +1,5 @@
 /**
- * webpack.config
+ * webpack.script
  *
  * @author GuoBin on 2019-07-20
  */

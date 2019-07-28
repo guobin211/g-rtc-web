@@ -3,7 +3,7 @@
  *
  * @author GuoBin on 2019-07-20
  */
-import { Rtc } from './Rtc';
+import { Rtc } from '../src/Rtc';
 
 window.onload = function () {
 

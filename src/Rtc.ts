@@ -4,10 +4,10 @@
  * @author GuoBin on 2019-07-20
  */
 
-import { IRtc, RtcOptions } from './IRtc';
-import { Player } from './Player';
-import { Tools } from './Tools';
-import { Socket } from './Socket';
+import { IRtc, RtcOptions } from './types/IRtc';
+import { Player } from './player/Player';
+import { Tools } from './util/Tools';
+import { Socket } from './socket/Socket';
 
 export class Rtc implements IRtc {
 
@@ -69,7 +69,7 @@ export class Rtc implements IRtc {
 
   open(): Promise<void> {
     return new Promise((resolve, reject) => {
-      window.navigator.getUserMedia({audio: true, video: {width: 1280, height: 720}},
+      window.navigator.getUserMedia({audio: false, video: {width: 1280, height: 720}},
         (stream) => {
           this._mediaStreamTrack = stream;
           this._mediaStreamTrack.onaddtrack = () => {
@@ -110,8 +110,14 @@ export class Rtc implements IRtc {
     this._interval = setInterval(() => {
       ctx.drawImage(this._player, 0, 0, 1280, 720);
       this._canvas.toBlob(blob => {
+        console.log(blob);
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          console.log(reader.result);
+        };
+        reader.readAsArrayBuffer(blob);
         this._socket.send(blob);
-      }, 'image/png', 50 );
+      }, 'image/png', 1);
     }, 500);
   }
 }

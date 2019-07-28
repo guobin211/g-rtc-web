@@ -1,10 +1,12 @@
 {
   "name": "g-rtc-web",
   "version": "1.0.0",
-  "description": "rtc player for web",
+  "description": "rtc player for the web",
   "main": "index.js",
   "scripts": {
-    "start": "webpack --config config/webpack.config.js",
+    "start": "webpack --config script/webpack.config.js",
+    "build": "tsc",
+    "doc": "typedoc --out docs ./src",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -30,6 +32,9 @@
     "ts-loader": "^6.0.4",
     "typescript": "^3.5.3",
     "webpack": "^4.36.1",
-    "webpack-cli": "^3.3.6"
+    "webpack-cli": "^3.3.6",
+    "vuepress": "^1.0.2",
+    "typedoc": "^0.15.0",
+    "ts-node": "^8.3.0"
   }
 }
