@@ -27,14 +27,32 @@ export class Rtc implements IRtc {
 
   private _socket: Socket;
 
+  private _rtcConnection: RTCPeerConnection;
+
+  private readonly _configuration = {
+    iceServers: [
+      {
+        urls: 'stun:127.0.0.1:12011',
+        username: 'admin@grtc.com',
+        credential: 'admin'
+      },
+      {
+        urls: [
+          'stun:127.0.0.1:12011',
+        ]
+      }]
+  };
+
+
   constructor(dom: string, video: string, options?: RtcOptions) {
     Tools.polyfill();
     this._warp = document.getElementById(dom);
     this._player = document.getElementById(video) as HTMLVideoElement;
     this._canvas = document.createElement('canvas');
-    this._canvas.width = 1280;
-    this._canvas.height = 720;
-    this._socket = new Socket('ws://localhost:12011');
+    this._canvas.width = 300;
+    this._canvas.height = 600;
+    // this._socket = new Socket('ws://localhost:12011');
+    this._rtcConnection = new RTCPeerConnection(null);
     this.initRtc();
   }
 
@@ -69,24 +87,22 @@ export class Rtc implements IRtc {
 
   open(): Promise<void> {
     return new Promise((resolve, reject) => {
-      window.navigator.getUserMedia({audio: false, video: {width: 1280, height: 720}},
-        (stream) => {
+      window.navigator.getUserMedia({audio: false, video: {width: this._canvas.width, height: this._canvas.height}},
+        (stream: MediaStream) => {
           this._mediaStreamTrack = stream;
           this._mediaStreamTrack.onaddtrack = () => {
-
           };
           this._player.srcObject = stream;
           this._player.onloadedmetadata = (ev: any) => {
-            console.log(ev);
             this._player.play().then(() => {
               resolve();
             }).catch(err => {
               reject(err);
             });
           };
-      }, (err) => {
-        reject(err);
-      });
+        }, (err) => {
+          reject(err);
+        });
     });
   }
 
@@ -108,7 +124,7 @@ export class Rtc implements IRtc {
     clearInterval(this._interval);
     const ctx = this._canvas.getContext('2d');
     this._interval = setInterval(() => {
-      ctx.drawImage(this._player, 0, 0, 1280, 720);
+      ctx.drawImage(this._player, 0, 0, this._canvas.width, this._canvas.height);
       this._canvas.toBlob(blob => {
         console.log(blob);
         const reader = new FileReader();

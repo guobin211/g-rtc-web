@@ -15,7 +15,7 @@ export class Player {
   private _warp: HTMLElement;
 
   constructor(dom: string, options: any) {
-    if (document.getElementById(dom))  {
+    if (document.getElementById(dom)) {
       this._warp = document.getElementById(dom);
       this.initVideo();
     } else {
