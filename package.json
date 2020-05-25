@@ -1,8 +1,11 @@
 {
   "name": "g-rtc-web",
-  "version": "0.0.0-development",
-  "description": "",
-  "keywords": [],
+  "version": "0.0.0",
+  "description": "a WebRTC project",
+  "keywords": [
+    "WebRTC",
+    "Canvas Renderer"
+  ],
   "main": "dist/g-rtc-web.umd.js",
   "module": "dist/g-rtc-web.es5.js",
   "typings": "dist/types/g-rtc-web.d.ts",
@@ -12,7 +15,7 @@
   "author": "GuoBin <guobin201314@gmail.com>",
   "repository": {
     "type": "git",
-    "url": "https:git@github.com:guobin211/g-rtc-web.git"
+    "url": "https://github.com/guobin211/g-rtc-web.git"
   },
   "license": "MIT",
   "engines": {
