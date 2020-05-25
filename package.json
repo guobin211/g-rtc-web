@@ -1,7 +1,7 @@
 {
   "name": "g-rtc-web",
   "version": "0.0.0",
-  "description": "a WebRTC project",
+  "description": "@guobin211/a WebRTC project",
   "keywords": [
     "WebRTC",
     "Canvas Renderer"
@@ -120,11 +120,12 @@
     "typescript": "^3.0.3"
   },
   "publishConfig": {
-    "access": "restricted"
+    "access": "public"
   },
   "husky": {
     "hooks": {
       "pre-commit": "lint-staged"
     }
-  }
+  },
+  "scopedRegistries": []
 }
