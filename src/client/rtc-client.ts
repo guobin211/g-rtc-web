@@ -1,3 +1,5 @@
-export default class RtcClient {
-
-}
+/**
+ * RtcClient
+ * create web client
+ */
+export default class RtcClient {}
