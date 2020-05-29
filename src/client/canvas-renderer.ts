@@ -3,35 +3,35 @@
  * 绘图器
  */
 export default class CanvasRenderer {
-
-  private canvas: HTMLCanvasElement;
-  private dpr = 1;
-  private ctx?: CanvasRenderingContext2D;
+  private canvas: HTMLCanvasElement
+  private dpr = 1
+  private ctx?: CanvasRenderingContext2D
   /**
    * 是否播放
    */
-  private isPlay = true;
+  private isPlay = true
 
   constructor(dom: HTMLCanvasElement, config?: CanvasConfig) {
-    this.canvas = dom;
+    this.canvas = dom
     if (config) {
       this.init(config)
     }
-    this.setUp();
+    this.setUp()
   }
 
   setUp() {
-    this.dpr = window.devicePixelRatio || 1;
-    const rect = this.canvas.getBoundingClientRect();
-    this.canvas.width = rect.width * this.dpr;
-    this.canvas.height = rect.height * this.dpr;
-    this.ctx = this.canvas.getContext('2d', {}) as CanvasRenderingContext2D;
-    this.ctx.scale(this.dpr, this.dpr);
+    this.dpr = window.devicePixelRatio || 1
+    const rect = this.canvas.getBoundingClientRect()
+    this.canvas.width = rect.width * this.dpr
+    this.canvas.height = rect.height * this.dpr
+    this.ctx = this.canvas.getContext('2d', {}) as CanvasRenderingContext2D
+    this.ctx.scale(this.dpr, this.dpr)
+    this.isPlay = true
   }
 
   init(config: CanvasConfig) {
-    this.canvas.width = config.width;
-    this.canvas.height = config.height;
+    this.canvas.width = config.width
+    this.canvas.height = config.height
   }
 
   /**
@@ -40,11 +40,11 @@ export default class CanvasRenderer {
    */
   playBlob(data: Blob) {
     if (!this.isPlay) {
-      return;
+      return
     }
-    const objURL = window.URL.createObjectURL(data);
-    this.play(objURL);
-    window.URL.revokeObjectURL(objURL);
+    const objURL = window.URL.createObjectURL(data)
+    this.play(objURL)
+    window.URL.revokeObjectURL(objURL)
   }
 
   /**
@@ -53,30 +53,29 @@ export default class CanvasRenderer {
    */
   play(data: string) {
     if (!this.isPlay) {
-      return;
+      return
     }
-    const img = new Image();
-    img.src = data;
+    const img = new Image()
+    img.src = data
     img.onload = () => {
-      this.render(img);
+      this.render(img)
     }
     img.onerror = () => {
-      console.error(`play(data: string) error: img`);
+      console.error(`play(data: string) error: img`)
     }
   }
 
   stop() {
-    this.isPlay = false;
-    this.ctx?.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.isPlay = false
+    this.ctx?.clearRect(0, 0, this.canvas.width, this.canvas.height)
   }
 
   render(img: HTMLImageElement) {
     this.ctx?.drawImage(img, 0, 0)
   }
-
 }
 
 interface CanvasConfig {
-  width: number;
-  height: number;
+  width: number
+  height: number
 }
