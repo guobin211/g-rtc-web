@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "declarationDir": "dist/types",
+    "outDir": "dist/lib",
+    "sourceMap": true,
+    "module": "ESNext",
+    "target": "ESNext",
+    "moduleResolution": "Node",
+    "allowJs": false,
+    "strict": true,
+    "noUnusedLocals": true,
+    "experimentalDecorators": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "removeComments": false,
+    "jsx": "preserve",
+    "lib": [
+      "DOM",
+      "ESNext"
+    ],
+    "rootDir": "packages",
+    "composite": true,
+    "declaration": true,
+    "paths": {},
+    "types": []
+  },
+  "include": [
+    "packages/rtc-client/*/src"
+  ],
+  "exclude": [
+    "node_modules"
+  ],
+  "references": []
+}

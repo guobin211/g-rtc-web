@@ -1,12 +1,20 @@
 {
   "name": "g-rtc-web",
   "version": "0.0.0",
-  "description": "@guobin211/a WebRTC project",
+  "private": true,
+  "scripts": {
+    "prebuild": "node scripts/pre-build.js"
+  },
+  "workspaces": [
+    "packages/*",
+    "templates/*"
+  ],
+  "description": "WebRTC Use Node Full Stack",
   "keywords": [
     "WebRTC",
-    "Canvas Renderer"
+    "Canvas Renderer",
+    "Node WebRTC"
   ],
-  "files": [],
   "author": "GuoBin <guobin201314@gmail.com>",
   "repository": {
     "type": "git",
@@ -16,10 +24,20 @@
   "engines": {
     "node": ">=12.0.0"
   },
-  "scripts": {
-  },
   "devDependencies": {
+    "@types/node": "^14.0.20",
+    "@typescript-eslint/eslint-plugin": "^3.6.0",
+    "@typescript-eslint/parser": "^3.6.0",
+    "@babel/core": "^7.10.4",
+    "eslint": "^7.4.0",
+    "prettier": "^2.0.5",
+    "rollup": "^2.21.0",
+    "serve": "^11.3.2",
+    "typescript": "^3.9.6",
+    "rollup-plugin-babel": "^4.4.0",
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-typescript2": "^0.27.1"
   },
-  "dependencies": {
-  }
+  "dependencies": {}
 }

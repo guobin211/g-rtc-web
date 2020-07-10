@@ -1,0 +1,19 @@
+{
+  "name": "@g-rtc-web/rtc-server",
+  "version": "0.0.0",
+  "description": "@g-rtc-web/rtc-server library",
+  "main": "rtc-server.js",
+  "module": "dist/rtc-server.esm.js",
+  "types": "dist/rtc-server.d.ts",
+  "files": [
+    "index.js",
+    "dist"
+  ],
+  "keywords": [
+    "WebRTC"
+  ],
+  "author": "Guo Bin",
+  "license": "MIT",
+  "dependencies": {
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "@g-rtc-web/rtc-client",
+  "version": "0.0.0",
+  "description": "@g-rtc-web/rtc-client",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "WebRTC"
+  ],
+  "author": "Guo Bin",
+  "license": "MIT"
+}
