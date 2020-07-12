@@ -2,6 +2,9 @@ const gulp = require("gulp")
 const rollup = require("rollup")
 const rollupTypescript = require("rollup-plugin-typescript2")
 const path = require("path")
+import pkg from "./package.json"
+
+console.log(pkg.version)
 
 const RTC_CLIENT = {
   name: "rtc-client",
