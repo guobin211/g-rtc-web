@@ -1,8 +1,6 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
-    "declarationDir": "dist/types",
-    "outDir": "dist/lib",
     "sourceMap": true,
     "module": "ESNext",
     "target": "ESNext",
@@ -25,9 +23,7 @@
     "paths": {},
     "types": []
   },
-  "include": [
-    "packages/rtc-client/*/src"
-  ],
+  "include": [],
   "exclude": [
     "node_modules"
   ],

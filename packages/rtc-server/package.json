@@ -6,7 +6,6 @@
   "module": "dist/rtc-server.esm.js",
   "types": "dist/rtc-server.d.ts",
   "files": [
-    "index.js",
     "dist"
   ],
   "keywords": [

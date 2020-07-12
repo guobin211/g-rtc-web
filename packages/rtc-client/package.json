@@ -2,9 +2,9 @@
   "name": "@g-rtc-web/rtc-client",
   "version": "0.0.0",
   "description": "@g-rtc-web/rtc-client",
-  "main": "dist/index.js",
-  "module": "dist/index.esm.js",
-  "types": "dist/index.d.ts",
+  "main": "dist/rtc-client.umd.js",
+  "module": "dist/rtc-client.esm.js",
+  "types": "dist/rtc-client/src/index.d.ts",
   "files": [
     "dist"
   ],
