@@ -1,3 +1,65 @@
-export function add(a: number, b: number): number {
-  return a + b
+export class RtcClient {
+
+  player: HTMLVideoElement
+  mediaStream?: MediaStream
+  constraints: MediaStreamConstraints = {
+    video: {
+      width: 720,
+      height: 360,
+      frameRate: {ideal: 10, max: 15}
+    },
+    audio: true
+  }
+
+  getUserMedia: (constraints: MediaStreamConstraints,
+                 successCallback: NavigatorUserMediaSuccessCallback,
+                 errorCallback: NavigatorUserMediaErrorCallback) => void
+
+  constructor(video: HTMLVideoElement) {
+    this.player = video
+    const navigator: any = window.navigator
+    const getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia
+
+    if (!getUserMedia) {
+      throw new Error("Not Support getUserMedia")
+    } else {
+      this.getUserMedia = getUserMedia
+    }
+  }
+
+  async openCamera(constraints?: MediaStreamConstraints, videoTarget?: HTMLVideoElement): Promise<MediaStream> {
+    let video = this.player
+    if (videoTarget) {
+      video = videoTarget
+      this.player = videoTarget
+    }
+    if (constraints) {
+      Object.assign(this.constraints, constraints)
+    }
+
+    return new Promise((resolve, reject) => {
+      navigator.getUserMedia(this.constraints, stream => {
+        this.mediaStream = stream
+        if ("srcObject" in video) {
+          video.srcObject = stream
+        } else {
+          video!.src = window.URL.createObjectURL(stream)
+        }
+        video.onloadedmetadata = (e) => {
+          video.play()
+        }
+        resolve(stream)
+      }, error => {
+        console.error(`RtcClient.openCamera(): ${error.name}: ${error.message}`)
+        reject(error)
+      })
+    })
+  }
+
+  closeCamera() {
+    if (this.mediaStream) {
+      this.mediaStream.getTracks()[0].stop()
+      this.mediaStream.getTracks()[1].stop()
+    }
+  }
 }
