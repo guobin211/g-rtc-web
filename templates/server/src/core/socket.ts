@@ -12,6 +12,11 @@ function normalize(): number {
 
 const port = normalize()
 
+export enum SocketEventType {
+  VideoBlob = "VideoBlob",
+  JsonMsg = "JsonMsg"
+}
+
 export function createWS() {
   const ws = new WebSocket.Server({
     port,
@@ -43,16 +48,11 @@ export function createWS() {
   }, 15000)
 
   ws.on("connection", webSocket => {
-    console.log("wss: connection: ", webSocket.protocol)
     webSocket.onmessage = function (event: WebSocket.MessageEvent) {
       console.log("client send message: ", event.data)
       // 转发offer
       ws.clients.forEach(c => c.send(event.data))
     }
-    webSocket.send(JSON.stringify({
-      type: "info",
-      data: "connection success"
-    }))
   })
 
   ws.on("headers", ev => {
@@ -64,10 +64,6 @@ export function createWS() {
   })
 
   ws.on("error", ev => {
-    console.log(ev)
-  })
-
-  ws.on("headers", ev => {
     console.log(ev)
   })
 

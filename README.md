@@ -22,7 +22,9 @@ A WebRTC project make Live easy.
 
     git clone git@github.com:guobin211/g-rtc-web.git
     
-    npm install g-rtc-web
+    npm install
+
+    npm run start
 
 ```
 

@@ -1,34 +1,9 @@
-import { RtcClient } from "../../../packages/rtc-client/src"
+import adapter from "webrtc-adapter"
+
+adapter.disableLog(true);
 
 (function () {
-  console.log("app start...")
-  const localVideo: HTMLVideoElement = document.querySelector("#local-video")
-  const remoteVideo: HTMLVideoElement = document.querySelector("#remote-video")
-  const localInfo = document.querySelector(".info")
-  const inputEl: HTMLInputElement = document.querySelector("#rtc-id")
-  const rtcClient = new RtcClient(localVideo)
-
-  let ws = new WebSocket("ws://localhost:8090")
-
-  ws.onmessage = function (msg) {
-    console.log(msg.data)
-    try {
-      const offer = JSON.parse(msg.data)
-      if (offer.name && offer.name !== inputEl.value) {
-        // 另一个用户的信息
-        console.log(offer.sdp)
-      }
-    } catch (e) {
-      console.log(e)
-    }
-  }
-  ws.onopen = function () {
-    console.log("open")
-  }
-  ws.onclose = function (ev) {
-    console.log("node socket closed: ", ev)
-  }
-
+  const video = {video: {width: 720, height: 360}, audio: true}
   const configuration = {
     iceServers: [
       {
@@ -40,68 +15,95 @@ import { RtcClient } from "../../../packages/rtc-client/src"
     ],
     iceCandidatePoolSize: 10
   }
+  const localVideo: HTMLVideoElement = document.querySelector("#local-video")
+  const remoteVideo: HTMLVideoElement = document.querySelector("#remote-video")
+  const localInfo = document.querySelector(".info")
+  const inputEl: HTMLInputElement = document.querySelector("#rtc-id")
+  const ws = new WebSocket("ws://192.168.100.134:8090")
+  ws.onmessage = async (msg) => {
+    const data = JSON.parse(msg.data)
+    if (data.type === "rtc-event") {
+      try {
+        const {desc, candidate} = data.content
+        console.log(data.content)
+        if (desc) {
+          if (desc.type === "offer") {
+            await localPeer.setRemoteDescription(desc)
+            const stream = await navigator.mediaDevices.getUserMedia(video)
+            stream.getTracks().forEach((track) => {
+              localPeer.addTrack(track, stream)
+            })
+            // await localPeer.setLocalDescription(await localPeer.createAnswer())
+            // sendMsg({desc: localPeer.localDescription})
+          } else if (desc.type === "answer") {
+            await localPeer.setRemoteDescription(desc)
+          } else {
+            console.log("Unsupported SDP type.")
+          }
+        } else if (candidate) {
+          console.log("localPeer add candidate")
+          await localPeer.addIceCandidate(candidate)
+        }
+      } catch (e) {
+        console.log(e)
+      }
+    }
+  }
 
-  let peerConnection = null
-  let localStream = null
-  let remoteStream = null
+  function sendMsg(data: any) {
+    ws.send(JSON.stringify({type: "rtc-event", content: data}))
+  }
+
+  const localPeer: RTCPeerConnection = new RTCPeerConnection(configuration)
+  let localStream: MediaStream
+  let remoteStream: MediaStream
+
+  // localPeer.onicecandidate = (ev) => {
+  //   console.log("onicecandidate")
+  //   sendMsg({candidate: ev.candidate})
+  // }
+  //
+  // localPeer.onnegotiationneeded = async () => {
+  //   console.log("onnegotiationneeded需要协商")
+  //   await localPeer.setLocalDescription(await localPeer.createOffer())
+  //   sendMsg({desc: localPeer.localDescription})
+  // }
+
+  localPeer.ontrack = (ev) => {
+    remoteVideo.srcObject = ev.streams[0]
+  }
 
   /**
    * 打开本地摄像头
    */
   function openLocal() {
     console.log("openLocal")
-    rtcClient.openCamera().then((stream) => {
-      localInfo.innerHTML = `ID: ${stream.id}`
+    navigator.getUserMedia(video, stream => {
       localStream = stream
-      localVideo.srcObject = stream
-      // 创建RTCPeerConnection
-      peerConnection = new RTCPeerConnection(configuration)
-      localStream.getTracks().forEach(track => {
-        peerConnection.addTrack(track, localStream)
-      })
-      peerConnection.createOffer().then(offer => {
-        return peerConnection.setLocalDescription(offer)
-      }).then(() => {
-        if (!ws) {
-          ws = new WebSocket("ws://localhost:8090")
-        }
-        if (ws) {
-          ws.send(JSON.stringify({
-            name: inputEl.value,
-            target: "admin2",
-            type: "video-offer",
-            sdp: peerConnection.localDescription
-          }))
-        } else {
-          console.error("WebSocket not connect")
-        }
-
-      }).catch(error => {
-        console.log(error)
-      })
-    })
+      localVideo.srcObject = localStream
+      localVideo.onloadedmetadata = (e) => {
+        localVideo.play().then(async () => {
+          console.log("打开本地摄像头")
+          // await localPeer.setLocalDescription(await localPeer.createOffer())
+          sendMsg({desc: localPeer.localDescription})
+        })
+      }
+    }, handleError)
   }
 
   function closeLocal() {
-    rtcClient.closeCamera()
-    console.log("closeLocal")
+    console.log(localStream)
+    localStream.getTracks()[0].stop()
+    localStream.getTracks()[1].stop()
   }
 
   function openRemote() {
-    console.log("openRemote")
     remoteStream = new MediaStream()
-    peerConnection.addEventListener("track", event => {
-      console.log("Got remote track:", event.streams[0])
-      event.streams[0].getTracks().forEach(track => {
-        console.log("Add a track to the remoteStream:", track)
-        remoteStream.addTrack(track)
-      })
-    })
+    remoteVideo.srcObject = remoteStream
   }
 
   function closeRemote() {
-    console.log("closeRemote")
-    ws.close(3009, "客户端主动关闭")
+    remoteStream.getTracks().forEach(track => track.stop())
   }
 
   setFunc([openLocal, closeLocal, openRemote, closeRemote])
@@ -111,4 +113,8 @@ function setFunc(func: Array<() => void>) {
   for (const fn of func) {
     ;(window as any)[fn.name] = fn
   }
+}
+
+function handleError(error: Error) {
+  console.log(`${error.name}, ${error.message}`)
 }

@@ -1,8 +1,10 @@
+import { Recorder } from "./core/Recorder"
+
 export class RtcClient {
 
-  player: HTMLVideoElement
-  mediaStream?: MediaStream
-  constraints: MediaStreamConstraints = {
+  private player: HTMLVideoElement
+  private mediaStream?: MediaStream
+  private constraints: MediaStreamConstraints = {
     video: {
       width: 720,
       height: 360,
@@ -10,12 +12,13 @@ export class RtcClient {
     },
     audio: true
   }
+  private recorder: Recorder
 
   getUserMedia: (constraints: MediaStreamConstraints,
                  successCallback: NavigatorUserMediaSuccessCallback,
                  errorCallback: NavigatorUserMediaErrorCallback) => void
 
-  constructor(video: HTMLVideoElement) {
+  constructor(video: HTMLVideoElement, ws: WebSocket) {
     this.player = video
     const navigator: any = window.navigator
     const getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia
@@ -25,6 +28,7 @@ export class RtcClient {
     } else {
       this.getUserMedia = getUserMedia
     }
+    this.recorder = new Recorder(ws)
   }
 
   async openCamera(constraints?: MediaStreamConstraints, videoTarget?: HTMLVideoElement): Promise<MediaStream> {
@@ -61,5 +65,10 @@ export class RtcClient {
       this.mediaStream.getTracks()[0].stop()
       this.mediaStream.getTracks()[1].stop()
     }
+  }
+
+  offer() {
+    this.recorder.recorder(this.player)
+    this.recorder.sendTo()
   }
 }
