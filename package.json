@@ -12,7 +12,7 @@
     "build-apps": "",
     "build-libs": "",
     "build-client": "gulp build-client",
-    "build-server": "",
+    "build-server": "gulp build-server",
     "build-wasm": "",
     "lint": "",
     "format": "",

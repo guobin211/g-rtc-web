@@ -1,7 +1,7 @@
 import debug from "debug"
 import http from "http"
-import { App } from "./app"
-import { createWS } from "./socket"
+import { App } from "./core/app"
+import { createWS } from "./core/socket"
 
 debug("node-server:express")
 const NODE_SERVER = http.createServer(new App().expressInstance)

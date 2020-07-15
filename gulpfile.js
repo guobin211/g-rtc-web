@@ -11,6 +11,14 @@ const RTC_CLIENT = {
   tsconfig: path.resolve(__dirname, "packages/rtc-client/tsconfig.json")
 }
 
+const RTC_SERVER = {
+  name: "rtc-server",
+  rootDir: path.resolve(__dirname, "packages/rtc-server/"),
+  entryFile: path.resolve(__dirname, "packages/rtc-server/src/index.ts"),
+  bundleDir: path.resolve(__dirname, "packages/rtc-server/dist"),
+  tsconfig: path.resolve(__dirname, "packages/rtc-server/tsconfig.json")
+}
+
 const NODE_SERVER = {
   name: "node-server",
   rootDir: path.resolve(__dirname, "templates/server/"),
@@ -65,6 +73,26 @@ gulp.task("build-client", async function () {
     sourcemap: true
   })
 })
+
+gulp.task("build-server", async function () {
+  const bundle = await rollup.rollup({
+    input: RTC_SERVER.entryFile,
+    plugins: [
+      rollupTypescript({
+        tsconfig: RTC_SERVER.tsconfig
+      })
+    ]
+  })
+
+  // For Node.js
+  await bundle.write({
+    file: `${RTC_SERVER.bundleDir}/${RTC_SERVER.name}.cjs.js`,
+    format: "cjs",
+    name: `${RTC_SERVER.name}`,
+    sourcemap: true
+  })
+})
+
 
 gulp.task("build-node", async function () {
   const bundle = await rollup.rollup({
