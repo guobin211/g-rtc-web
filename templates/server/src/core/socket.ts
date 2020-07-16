@@ -13,8 +13,18 @@ function normalize(): number {
 const port = normalize()
 
 export enum SocketEventType {
-  VideoBlob = "VideoBlob",
-  JsonMsg = "JsonMsg"
+  JoinRoom = "JoinRoom",
+  Offer = "Offer",
+  Answer = "Answer",
+  IceCandidate = "IceCandidate"
+}
+
+interface SocketData {
+  type: SocketEventType
+  roomId: string
+  from: string
+  to: string
+  body: any
 }
 
 export function createWS() {
@@ -38,25 +48,38 @@ export function createWS() {
     }
   })
 
-  setInterval(() => {
-    ws.clients.forEach(c => {
-      c.send(JSON.stringify({
-        type: "alive",
-        data: "ws alive interval"
-      }))
-    })
-  }, 15000)
-
-  ws.on("connection", webSocket => {
+  ws.on("connection", (webSocket) => {
     webSocket.onmessage = function (event: WebSocket.MessageEvent) {
-      console.log("client send message: ", event.data)
-      // 转发offer
-      ws.clients.forEach(c => c.send(event.data))
+      if (typeof event.data === "string") {
+        const data: SocketData = JSON.parse(event.data)
+        switch (data.type) {
+          case SocketEventType.JoinRoom:
+            console.log("JoinRoom")
+            console.log(data)
+            break
+          case SocketEventType.Offer:
+            console.log("Offer")
+            console.log(data)
+            break
+          case SocketEventType.Answer:
+            console.log("Answer")
+            console.log(data)
+            break
+          case SocketEventType.IceCandidate:
+            console.log("IceCandidate")
+            console.log(data)
+            break
+          default:
+            return
+        }
+        // 广播给其他人
+        ws.clients.forEach(client => {
+          if (client !== webSocket) {
+            client.send(event.data)
+          }
+        })
+      }
     }
-  })
-
-  ws.on("headers", ev => {
-    console.log(ev)
   })
 
   ws.on("close", () => {

@@ -82,13 +82,6 @@
     .body{
       flex:  1;
     }
-    .footer{
-      height: 42px;
-      background: #999999;
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-    }
     .player {
       width: 100%;
       height: 50%;
@@ -96,9 +89,6 @@
     button {
       height: 32px;
       margin-left: 20px;
-    }
-    .info{
-      padding-left: 20px;
     }
     #local-video{
       width: 720px;
@@ -114,13 +104,8 @@
 <div id="app">
   <div class="container">
     <div class="top">
-      <button type="button" onclick="openLocal()">打开本地</button>
-      <button type="button" onclick="closeLocal()">关闭本地</button>
-      <label for="rtc-id">
-        <input id="rtc-id" type="text" value="admin" placeholder="Name">
-      </label>
-      <button type="button" onclick="openRemote()">连接远程</button>
-      <button type="button" onclick="closeRemote()">关闭远程</button>
+      <button type="button" id="openLocal">创建视频</button>
+      <button type="button" id="closeLocal">关闭视频</button>
     </div>
     <div class="body">
       <div class="player">
@@ -129,9 +114,6 @@
       <div class="player">
         <video id="remote-video" autoplay muted></video>
       </div>
-    </div>
-    <div class="footer">
-      <p class="info">本地信息</p>
     </div>
   </div>
 </div>

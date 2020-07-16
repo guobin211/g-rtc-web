@@ -1,120 +1,180 @@
 import adapter from "webrtc-adapter"
+import { SocketData, SocketEventType } from "./helper"
 
-adapter.disableLog(true);
-
-(function () {
-  const video = {video: {width: 720, height: 360}, audio: true}
-  const configuration = {
+adapter.disableLog(true)
+const CONFIG = {
+  Media: {video: {width: 720, height: 360}, audio: true},
+  Server: {
     iceServers: [
       {
-        urls: [
-          "stun:stun1.l.google.com:19302",
-          "stun:stun2.l.google.com:19302"
-        ]
+        urls: "stun:stun.stunprotocol.org"
+      },
+      {
+        urls: "turn:numb.viagenie.ca",
+        credential: "muazkh",
+        username: "webrtc@live.com"
       }
-    ],
-    iceCandidatePoolSize: 10
-  }
-  const localVideo: HTMLVideoElement = document.querySelector("#local-video")
-  const remoteVideo: HTMLVideoElement = document.querySelector("#remote-video")
-  const localInfo = document.querySelector(".info")
-  const inputEl: HTMLInputElement = document.querySelector("#rtc-id")
-  const ws = new WebSocket("ws://192.168.100.134:8090")
-  ws.onmessage = async (msg) => {
-    const data = JSON.parse(msg.data)
-    if (data.type === "rtc-event") {
-      try {
-        const {desc, candidate} = data.content
-        console.log(data.content)
-        if (desc) {
-          if (desc.type === "offer") {
-            await localPeer.setRemoteDescription(desc)
-            const stream = await navigator.mediaDevices.getUserMedia(video)
-            stream.getTracks().forEach((track) => {
-              localPeer.addTrack(track, stream)
-            })
-            // await localPeer.setLocalDescription(await localPeer.createAnswer())
-            // sendMsg({desc: localPeer.localDescription})
-          } else if (desc.type === "answer") {
-            await localPeer.setRemoteDescription(desc)
-          } else {
-            console.log("Unsupported SDP type.")
-          }
-        } else if (candidate) {
-          console.log("localPeer add candidate")
-          await localPeer.addIceCandidate(candidate)
-        }
-      } catch (e) {
-        console.log(e)
-      }
-    }
-  }
-
-  function sendMsg(data: any) {
-    ws.send(JSON.stringify({type: "rtc-event", content: data}))
-  }
-
-  const localPeer: RTCPeerConnection = new RTCPeerConnection(configuration)
-  let localStream: MediaStream
-  let remoteStream: MediaStream
-
-  // localPeer.onicecandidate = (ev) => {
-  //   console.log("onicecandidate")
-  //   sendMsg({candidate: ev.candidate})
-  // }
-  //
-  // localPeer.onnegotiationneeded = async () => {
-  //   console.log("onnegotiationneeded需要协商")
-  //   await localPeer.setLocalDescription(await localPeer.createOffer())
-  //   sendMsg({desc: localPeer.localDescription})
-  // }
-
-  localPeer.ontrack = (ev) => {
-    remoteVideo.srcObject = ev.streams[0]
-  }
-
-  /**
-   * 打开本地摄像头
-   */
-  function openLocal() {
-    console.log("openLocal")
-    navigator.getUserMedia(video, stream => {
-      localStream = stream
-      localVideo.srcObject = localStream
-      localVideo.onloadedmetadata = (e) => {
-        localVideo.play().then(async () => {
-          console.log("打开本地摄像头")
-          // await localPeer.setLocalDescription(await localPeer.createOffer())
-          sendMsg({desc: localPeer.localDescription})
-        })
-      }
-    }, handleError)
-  }
-
-  function closeLocal() {
-    console.log(localStream)
-    localStream.getTracks()[0].stop()
-    localStream.getTracks()[1].stop()
-  }
-
-  function openRemote() {
-    remoteStream = new MediaStream()
-    remoteVideo.srcObject = remoteStream
-  }
-
-  function closeRemote() {
-    remoteStream.getTracks().forEach(track => track.stop())
-  }
-
-  setFunc([openLocal, closeLocal, openRemote, closeRemote])
-})()
-
-function setFunc(func: Array<() => void>) {
-  for (const fn of func) {
-    ;(window as any)[fn.name] = fn
+    ]
   }
 }
 
-function handleError(error: Error) {
-  console.log(`${error.name}, ${error.message}`)
+const userVideo: HTMLVideoElement = document.querySelector("#local-video")
+const remoteVideo: HTMLVideoElement = document.querySelector("#remote-video")
+const closeBtn = document.querySelector("#closeLocal")
+const openBtn = document.querySelector("#openLocal")
+const ws = new WebSocket("ws://192.168.100.137:8090")
+const roomId = "Admin"
+let peerConnection: RTCPeerConnection
+let userStream: MediaStream
+let otherUser: string
+const user = Math.ceil(Math.random() * 1000).toString(10)
+
+/**
+ * 发送消息
+ * @param data SocketData
+ */
+function sendMsg(data: SocketData) {
+  ws.send(JSON.stringify(data))
+}
+
+/**
+ * 处理socket消息
+ * @param ev MessageEvent
+ */
+function handleSocket(ev: MessageEvent) {
+  const data: SocketData = JSON.parse(ev.data)
+  console.log(data)
+  switch (data.type) {
+    case SocketEventType.JoinRoom:
+      callUser(data.from).then()
+      break;
+    case SocketEventType.Offer:
+      handleOfferCall(data.body)
+      break;
+    case SocketEventType.Answer:
+      handleAnswer(data.body)
+      break;
+    case SocketEventType.IceCandidate:
+      handleNewICECandidateMsg(data.body)
+      break;
+    default:
+      return;
+  }
+}
+
+/**
+ * 处理 ICE 认证
+ * @param body RTCIceCandidateInit
+ */
+function handleNewICECandidateMsg(body: RTCIceCandidateInit) {
+  const candidate = new RTCIceCandidate(body)
+  peerConnection.addIceCandidate(candidate).catch(console.log)
+}
+
+/**
+ * 处理回答Answer
+ * @param body RTCSessionDescriptionInit
+ */
+function handleAnswer(body: RTCSessionDescriptionInit) {
+  const desc = new RTCSessionDescription(body)
+  peerConnection.setRemoteDescription(desc).catch(console.log)
+}
+
+/**
+ * 接受Offer返回Answer
+ * @param body RTCSessionDescription
+ */
+function handleOfferCall(body: RTCSessionDescription) {
+  peerConnection = createPeer()
+  const desc = new RTCSessionDescription(body)
+  peerConnection.setRemoteDescription(desc).then(() => {
+    userStream.getTracks().forEach(t => peerConnection.addTrack(t, userStream))
+  }).then(() => {
+    return peerConnection.createAnswer()
+  }).then((answer: RTCSessionDescriptionInit) => {
+    return peerConnection.setLocalDescription(answer)
+  }).then(() => {
+    const payload: SocketData = {
+      type: SocketEventType.Answer,
+      roomId,
+      to: otherUser,
+      from: user,
+      body: peerConnection.localDescription
+    }
+    sendMsg(payload)
+  })
+}
+
+/**
+ * 处理其他用户加入房间
+ * @param otherUserId string
+ */
+async function callUser(otherUserId: string) {
+  if (!userStream) {
+    await openMedia()
+  }
+  peerConnection = createPeer(otherUserId)
+  userStream.getTracks().forEach(t => peerConnection.addTrack(t, userStream))
+}
+
+/**
+ * 创建连接 RTCPeerConnection
+ * @param otherUserId string
+ */
+function createPeer(otherUserId?: string): RTCPeerConnection {
+  const peer = new RTCPeerConnection(CONFIG.Server)
+
+  peer.onicecandidate = function (ev) {
+    if (ev.candidate) {
+      const payload: SocketData = {
+        type: SocketEventType.IceCandidate,
+        roomId,
+        to: otherUser,
+        from: user,
+        body: ev.candidate
+      }
+      sendMsg(payload)
+    }
+  }
+
+  peer.ontrack = function (ev) {
+    remoteVideo.srcObject = ev.streams[0]
+  }
+
+  peer.onnegotiationneeded = function () {
+    handleNegotiationNeededEvent(otherUserId)
+  }
+  return peer
+}
+
+function handleNegotiationNeededEvent(otherUserId: string) {
+  peerConnection.createOffer().then(offer => {
+    return peerConnection.setLocalDescription(offer)
+  }).then(() => {
+    const payload: SocketData = {
+      type: SocketEventType.Offer,
+      roomId,
+      from: user,
+      to: otherUserId,
+      body: peerConnection.localDescription
+    }
+    sendMsg(payload)
+  }).catch(console.log)
+}
+
+openBtn.addEventListener("click", openMedia, false)
+closeBtn.addEventListener("click", closeMedia, false)
+
+async function openMedia() {
+  await navigator.mediaDevices.getUserMedia({audio: true, video: true}).then(stream => {
+    userVideo.srcObject = stream
+    userStream = stream
+    ws.onmessage = handleSocket
+    sendMsg({type: SocketEventType.JoinRoom, roomId})
+  })
+}
+
+function closeMedia() {
+  userStream.getTracks()[0].stop()
+  userStream.getTracks()[1].stop()
 }
