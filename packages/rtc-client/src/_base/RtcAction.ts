@@ -1,10 +1,10 @@
+import { Room } from "./Room"
+import { Visitor } from "./Visitor"
+
 export interface RtcAction {
   getMedia(): Promise<MediaStream>
   createPeerConnection(): Promise<RTCPeerConnection>
-  createRoom(): Promise<any>
-  joinRoom(): Promise<any>
-  sendOffer(): any
-  sendAnswer(): any
-  closeMedia(): any
-  stopOffer(): any
+  createRoom(): Promise<Room>
+  joinRoom(rtcRoomId: string): Promise<Visitor[]>
+  closeMedia(): Promise<boolean>
 }
