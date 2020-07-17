@@ -12,5 +12,12 @@
     "WebRTC"
   ],
   "author": "Guo Bin",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@types/ws": "^7.2.6",
+    "@types/node": "^14.0.20"
+  },
+  "dependencies": {
+    "ws": "^7.3.1"
+  }
 }

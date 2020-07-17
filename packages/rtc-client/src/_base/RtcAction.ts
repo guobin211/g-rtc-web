@@ -1,5 +1,4 @@
-import { Room } from "./Room"
-import { Visitor } from "./Visitor"
+import { Visitor, Room } from "../../../common"
 
 export interface RtcAction {
   getMedia(): Promise<MediaStream>

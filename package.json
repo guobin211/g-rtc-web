@@ -50,7 +50,8 @@
     "rollup": "^2.21.0",
     "parcel-bundler": "^1.12.4",
     "rollup-plugin-typescript2": "^0.27.1",
-    "anywhere": "^1.5.0"
+    "anywhere": "^1.5.0",
+    "eslint": "^7.4.0"
   },
   "dependencies": {
     "body-parser": "^1.19.0",
