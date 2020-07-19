@@ -48,7 +48,7 @@ export function createWS() {
     }
   })
 
-  ws.on("connection", (webSocket) => {
+  ws.on("connection", (webSocket: WebSocket) => {
     webSocket.onmessage = function (event: WebSocket.MessageEvent) {
       if (typeof event.data === "string") {
         const data: SocketData = JSON.parse(event.data)
