@@ -1,10 +1,10 @@
 import { RtcAction } from "../_base/RtcAction"
-import { Room, RtcSocketEvent, RtcSocketMessage, Visitor } from "../../../common"
+import { BaseRtcEventEnum, BaseRtcVisitor, RtcEventData } from "../../../common"
 
 interface RtcClientConfig {
   webSocketUrl: string
   mediaOption?: MediaStreamConstraints,
-  user: Visitor
+  user: BaseRtcVisitor
 }
 
 export class RtcClient implements RtcAction {
@@ -23,22 +23,21 @@ export class RtcClient implements RtcAction {
   private wss: WebSocket
 
   constructor(private option: RtcClientConfig) {
-    console.log(this.peerConnection)
     this.wss = new WebSocket(this.option.webSocketUrl)
     this.wss.onopen = (event) => {
-      this.sendMessage({ type: RtcSocketEvent.Connected, sender: this.option.user, body: "" })
+      // todo manage opened socket
     }
     this.wss.onmessage = (event) => {
       try {
-        const data: RtcSocketMessage = JSON.parse(event.data)
-        switch (data.type) {
-          case RtcSocketEvent.JoinRoom:
+        const data: RtcEventData = JSON.parse(event.data)
+        switch (data.event) {
+          case BaseRtcEventEnum.JoinRoom:
             break;
-          case RtcSocketEvent.SendOffer:
+          case BaseRtcEventEnum.PeerOffer:
             break;
-          case RtcSocketEvent.SendAnswer:
+          case BaseRtcEventEnum.PeerAnswer:
             break;
-          case RtcSocketEvent.IceCandidate:
+          case BaseRtcEventEnum.PeerIceCandidate:
             break;
           default:
             console.log(data)
@@ -73,25 +72,18 @@ export class RtcClient implements RtcAction {
     return new Promise((resolve, reject) => {
       if (this.localStream) {
         this.peerConnection = this.createPeer()
+        resolve(this.peerConnection)
       }
     })
   }
 
-  public createRoom(): Promise<Room> {
-    return new Promise((resolve, reject) => {})
-  }
-
-  public getMedia(): Promise<MediaStream> {
+  public getUserMedia(): Promise<MediaStream> {
     return new Promise((resolve, reject) => {
       navigator.mediaDevices.getUserMedia(this.mediaOption).then((stream) => {
         this.localStream = stream
         resolve(stream)
       }).catch(e => reject(e))
     })
-  }
-
-  public joinRoom(rtcRoomId: string): Promise<Visitor[]> {
-    return Promise.resolve([])
   }
 
   /**
@@ -106,10 +98,10 @@ export class RtcClient implements RtcAction {
     }
     peer.onicecandidate = (ev) => {
       if (ev.candidate) {
-        const payload: RtcSocketMessage = {
-          type: RtcSocketEvent.IceCandidate,
-          sender: { visitorId: "" },
-          body: ev.candidate
+        const payload: RtcEventData = {
+          event: BaseRtcEventEnum.PeerIceCandidate,
+          sender: { id: "", roomId: "" },
+          data: ev.candidate
         }
         this.sendMessage(payload)
       }
@@ -117,7 +109,25 @@ export class RtcClient implements RtcAction {
     return peer
   }
 
-  private sendMessage(data: RtcSocketMessage) {
+  private sendMessage(data: RtcEventData) {
     this.wss.send(JSON.stringify(data))
+  }
+
+  public startRecord(): Promise<any> {
+    const options = {
+      mimeType: "video/webm;codecs=vp8"
+    }
+    try {
+      const mediaRecorder = new (window as any).MediaRecorder(this.localStream, options);
+      mediaRecorder.start(10)
+    } catch (e) {
+      console.log(e)
+    }
+
+    return Promise.resolve(undefined);
+  }
+
+  public stopRecord(): Promise<any> {
+    return Promise.resolve(undefined);
   }
 }
