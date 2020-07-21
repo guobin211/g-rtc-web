@@ -1,16 +1,13 @@
-import { SocketServer } from "./_impl/SocketServer"
+import { SocketServer } from "./core/SocketServer"
 
 export class RtcServer {
-  private socketServer: SocketServer
+  private readonly socketServer: SocketServer
 
   constructor() {
     this.socketServer = new SocketServer()
+    if (this.socketServer) {
+      console.info("SocketServer Created")
+    }
   }
-
-  start() {
-    this.socketServer.start()
-  }
-
-  stop() {}
 
 }
