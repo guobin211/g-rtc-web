@@ -1,3 +1,3 @@
-export * from "./Room"
-export * from "./Visitor"
-export * from "./SocketConfig"
+export * from "./BaseRtcRoom"
+export * from "./BaseRtcVisitor"
+export * from "./BaseRtcEventEnum"
