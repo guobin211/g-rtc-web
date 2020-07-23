@@ -1,10 +1,13 @@
 import WebSocket, { ServerOptions } from "ws"
 import { BaseRtcOptions } from "../base"
 import { BaseRtcEventEnum, RtcEventData } from "../../../common"
+import { RtcRoom } from "./RtcRoom"
+import { RtcVisitor } from "./RtcVisitor"
 
 export class SocketServer {
   private wss: WebSocket.Server
   private readonly option: ServerOptions
+  private readonly rooms: RtcRoom[] = []
 
   constructor(option: ServerOptions = BaseRtcOptions) {
     this.option = Object.assign(BaseRtcOptions, option)
@@ -14,6 +17,10 @@ export class SocketServer {
     this.wss.on("close", this.handleClose)
   }
 
+  /**
+   * 绑定socket消息事件
+   * @param socket
+   */
   private handleConnection(socket: WebSocket) {
     socket.on("message", (message) => {
       if (typeof message === "string") {
@@ -23,8 +30,12 @@ export class SocketServer {
             case BaseRtcEventEnum.Connection:
               break
             case BaseRtcEventEnum.CreateRoom:
+              const room = new RtcRoom()
+              room.addVisitor(new RtcVisitor(socket))
+              this.rooms.push(room)
               break
             case BaseRtcEventEnum.JoinRoom:
+              this.rooms.find(r => r.id === info.data)?.addVisitor(new RtcVisitor(socket))
               break
             case BaseRtcEventEnum.LeaveRoom:
               break
@@ -35,11 +46,11 @@ export class SocketServer {
             case BaseRtcEventEnum.PeerIceCandidate:
               break
             default:
-              console.info("Unknown Event Type")
+              console.info("WebSocket Unknown Event Type")
               break
           }
         } catch (e) {
-          console.error("JSON.parse error with socket message")
+          console.error("JSON.parse() error with WebSocket message")
         }
       }
     })
@@ -47,7 +58,7 @@ export class SocketServer {
   }
 
   private handleError(error: Error) {
-    console.info("wss socket closed.")
+    console.error(`wss socket error ${error}`)
   }
 
   private handleClose() {
